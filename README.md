@@ -1,5 +1,10 @@
 
+
 # linreg
+
+![R-CMD-check](https://github.com/xxm12345666/linreg/actions/workflows/test-coverage.yml/badge.svg)
+[![codecov](https://codecov.io/gh/xxm12345666/linreg/branch/main/graph/badge.svg)](https://codecov.io/gh/YourGitHubUsername/linreg)
+
 
 `linreg` is an R package that implements linear regression without using the `lm` function.
 
