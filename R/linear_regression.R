@@ -23,14 +23,28 @@
 #' model <- linear_regression(mpg ~ wt + hp, data = mtcars)
 #' print(model)
 #' @export
+# Linear regression function
 linear_regression <- function(formula, data, na.action = na.omit) {
-  # Handle NA values
+  # Handle missing values
+  if (any(is.na(data))) {
+    warning("Data contains missing values. Please handle them using na.action.")
+  }
   data <- na.action(data)
 
   # Extract response and predictor variables
   model_frame <- model.frame(formula, data)
   y <- model.response(model_frame)
   X <- model.matrix(attr(model_frame, "terms"), model_frame)
+
+  # Ensure column names are not NULL
+  if (is.null(colnames(X))) {
+    colnames(X) <- c("(Intercept)", attr(terms(formula), "term.labels"))
+  }
+
+  # Check if design matrix is singular
+  if (det(t(X) %*% X) == 0) {
+    stop("The design matrix is singular and cannot be inverted. Check your data for collinearity or insufficient observations.")
+  }
 
   # Calculate coefficients using OLS
   beta <- solve(t(X) %*% X) %*% t(X) %*% y
@@ -53,10 +67,7 @@ linear_regression <- function(formula, data, na.action = na.omit) {
 
   # Standard errors of coefficients
   std_error <- sqrt(diag(cov_matrix))
-
-  # t-values and p-values
-  t_values <- beta / std_error
-  p_values <- 2 * pt(-abs(t_values), df = df_residual)
+  names(std_error) <- colnames(X)  # Attach variable names
 
   # R-squared and Adjusted R-squared
   ss_total <- sum((y - mean(y))^2)
@@ -64,7 +75,7 @@ linear_regression <- function(formula, data, na.action = na.omit) {
   r_squared <- 1 - (ss_residual / ss_total)
   adj_r_squared <- 1 - ((1 - r_squared) * (n - 1) / df_residual)
 
-  # Return result as a list
+  # Return result as a list without p-values
   list(
     coefficients = as.vector(beta),
     fitted_values = as.vector(fitted_values),
@@ -72,8 +83,7 @@ linear_regression <- function(formula, data, na.action = na.omit) {
     r_squared = r_squared,
     adj_r_squared = adj_r_squared,
     std_error = std_error,
-    t_values = as.vector(t_values),
-    p_values = as.vector(p_values),
+    t_values = as.vector(beta / std_error),  # Still return t-values
     df_residual = df_residual
   )
 }
