@@ -15,85 +15,104 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
+library(bench)
 library(linreg)
 ```
 
 ## Introduction
 
-This tutorial demonstrates how to use the linreg package to perform linear regression. The linear_regression function replicates much of the behavior of lm while offering flexibility for educational or custom purposes.
+This tutorial demonstrates how to use the linear_regression for performing linear regression and analyzing its outputs. The function calculates model coefficients, residuals, R-squared values, and other statistics.
 
 
-## Single Predictor Model
+## Example: Analyzing the mtcars Dataset
 
-We start with a simple linear regression model using the mtcars dataset. The dependent variable (mpg) is predicted by one independent variable (wt).
+The mtcars dataset contains data about various car models and their properties. Let's fit a linear regression model to predict miles per gallon (mpg) using cyl, disp, and hp as predictors.
+
+# Performing Linear Regression
+
+Use the linear_regression to fit the model:
+```{r}
+# Load the mtcars dataset
+data(mtcars)
+
+# Fit the linear regression model
+result <- linear_regression(mtcars, "mpg", c("cyl", "disp", "hp"))
+
+# View the model output
+result
+```
+
+## Coefficients Table
+
+The Coefficients table shows the estimated coefficients, their standard errors, confidence intervals, t-values, and p-values:
 
 ```{r}
-# Perform linear regression with one predictor
-model1 <- linear_regression(mpg ~ wt, data = mtcars)
-# Perform linear regression with lm for comparison
-lm_model1 <- lm(mpg ~ wt, data = mtcars)
-
-# Print linreg result
-model1
-
-# Print lm summary
-summary(lm_model1)
+# Coefficients table
+result$Coefficients
 
 ```
 
-## Multiple Predictors Model
+## Residuals Summary
 
-You can extend the model to include multiple predictors. For example, we include hp (horsepower) as an additional predictor:
-
+The residuals summary provides an overview of the residuals from the model:
 ```{r}
-# Perform linear regression with two predictors using linreg
-model2 <- linear_regression(mpg ~ wt + hp, data = mtcars)
-
-# Perform linear regression with lm for comparison
-lm_model2 <- lm(mpg ~ wt + hp, data = mtcars)
-
-# Print linreg result
-model2
-
-# Print lm summary
-summary(lm_model2)
+# Residuals summary
+result$Residuals
 
 ```
-Comparison of Coefficients:
+
+## R-squared and Adjusted R-squared
+
+The R-squared and Adjusted R-squared values indicate how well the model explains the variability in the response variable:
 ```{r}
-cat("linreg Coefficients:\n", model2$coefficients, "\n")
-cat("lm Coefficients:\n", coef(lm_model2), "\n")
+# R-squared values
+cat("Multiple R-squared:", result$Multiple_R_squared, "\n")
+cat("Adjusted R-squared:", result$Adjusted_R_squared, "\n")
+
 ```
 
-Comparison of R-squared:
+## Residual Standard Error
+
+The residual standard error gives an estimate of the variability in the residuals:
 ```{r}
-cat("linreg R-squared:", model2$r_squared, "\n")
-cat("lm R-squared:", summary(lm_model2)$r.squared, "\n")
+# Residual standard error
+result$Residual_standard_error
+
 ```
 
-Comparison of Adjusted R-squared:
+## F-statistic
+
+The F-statistic tests the overall significance of the model:
 ```{r}
-cat("linreg Adjusted R-squared:", model2$adj_r_squared, "\n")
-cat("lm Adjusted R-squared:", summary(lm_model2)$adj.r.squared, "\n")
+# F-statistic
+result$F_statistics
+
 ```
 
+## Example: Interpreting Results
 
-## Residual Diagnostics
+Based on the results, you can draw conclusions about the significance of the predictors (cyl, disp, hp) and the goodness of fit of the model.
 
-The linear_regression function also provides residuals, which can be used to evaluate the model fit visually.
+Predictors with low p-values are significant contributors to the model.
+A high R-squared indicates the model explains a large proportion of the variability in mpg.
+
+## Custom Dataset Example
+
+You can use your own dataset with the function. Here's an example using a custom dataset:
 
 ```{r}
-# Residual diagnostics
-par(mfrow = c(1, 2))  # Set up a 1x2 plotting space
+# Create a custom dataset
+custom_data <- data.frame(
+  y = c(10, 20, 15, 25, 30),
+  x1 = c(1, 2, 3, 4, 5),
+  x2 = c(5, 7, 6, 8, 10)  
+)
 
-# Residuals from linreg
-plot(model2$residuals, main = "Residuals (linreg)", ylab = "Residuals", xlab = "Index")
-abline(h = 0, col = "red", lty = 2)
+custom_result <- linear_regression(custom_data, "y", c("x1", "x2"))
 
-# Residuals from lm
-plot(residuals(lm_model2), main = "Residuals (lm)", ylab = "Residuals", xlab = "Index")
-abline(h = 0, col = "red", lty = 2)
 
+# View the model output
+custom_result
 
 ```
 

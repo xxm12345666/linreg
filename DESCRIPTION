@@ -1,7 +1,7 @@
 Package: linreg
 Type: Package
 Title: Linear Regression Package
-Version: 0.1.0
+Version: 0.1.1
 Author: Xiaomeng Xu
 Maintainer: Xiaomeng Xu <xxmeng@umich.edu>
 Description: A package that implements linear regression without using `lm`.

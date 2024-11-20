@@ -1,107 +1,63 @@
 library(testthat)
-library(linreg)
-
-# Test single predictor regression
-test_that("linear_regression calculates correct coefficients for single predictor", {
-  # Fit the model with linreg
-  model <- linear_regression(mpg ~ wt, data = mtcars)
-
-  # Fit the model with lm for comparison
-  lm_model <- lm(mpg ~ wt, data = mtcars)
-
-  # Compare coefficients
-  expect_equal(model$coefficients, as.vector(coef(lm_model)), tolerance = 1e-5)
-
-  # Compare R-squared
-  expect_equal(model$r_squared, summary(lm_model)$r.squared, tolerance = 1e-5)
-
-  # Compare adjusted R-squared
-  expect_equal(model$adj_r_squared, summary(lm_model)$adj.r.squared, tolerance = 1e-5)
-})
-
-# Test multiple predictors regression
-test_that("linear_regression handles multiple predictors correctly", {
-  # Fit the model with linreg
-  model <- linear_regression(mpg ~ wt + hp, data = mtcars)
-
-  # Fit the model with lm for comparison
-  lm_model <- lm(mpg ~ wt + hp, data = mtcars)
-
-  # Compare coefficients
-  expect_equal(model$coefficients, as.vector(coef(lm_model)), tolerance = 1e-5)
-
-  # Compare R-squared
-  expect_equal(model$r_squared, summary(lm_model)$r.squared, tolerance = 1e-5)
-
-  # Compare adjusted R-squared
-  expect_equal(model$adj_r_squared, summary(lm_model)$adj.r.squared, tolerance = 1e-5)
-})
-
-# Test residuals
-test_that("linear_regression calculates residuals correctly", {
-  # Fit the model with linreg
-  model <- linear_regression(mpg ~ wt, data = mtcars)
-
-  # Fit the model with lm for comparison
-  lm_model <- lm(mpg ~ wt, data = mtcars)
-
-  # Compare residuals
-  expect_equal(model$residuals, as.vector(residuals(lm_model)), tolerance = 1e-5)
-})
-
-# Test p-values
-test_that("linear_regression calculates p-values correctly", {
-  model <- linear_regression(mpg ~ wt, data = mtcars)
-  lm_model <- lm(mpg ~ wt, data = mtcars)
-  lm_summary <- summary(lm_model)
-})
 
 
+test_that("linear regression function tests", {
+  model=lm(mpg~cyl+disp+hp,mtcars)
+  #test if output is a list
+  result=linear_regression(mtcars, "mpg", c("cyl", "disp", "hp"))
+  expect_type(result, "list")
 
-# Test standard errors
-test_that("linear_regression calculates standard errors correctly", {
-  # Fit the model with linreg
-  model <- linear_regression(mpg ~ wt, data = mtcars)
+  #test coefficients
+  for (i in 1:4) {
+    expect_equal(summary(model)$coefficients[i,1],
+                 result$Coefficients$Estimate[i],
+                 tolerance = 1e-5)
+    expect_equal(summary(model)$coefficients[i,2],
+                 result$Coefficients$Std_Error[i],
+                 tolerance = 1e-5)
+    expect_equal(summary(model)$coefficients[i,3],
+                 result$Coefficients$t_value[i],
+                 tolerance = 1e-5)
+    expect_equal(summary(model)$coefficients[i,4],
+                 result$Coefficients$p_value[i],
+                 tolerance = 1e-5)
+  }
 
-  # Fit the model with lm for comparison
-  lm_model <- lm(mpg ~ wt, data = mtcars)
-  lm_summary <- summary(lm_model)
+  #test confidence interval
+  CI=confint(model)
+  for (i in 1:4) {
+    expect_equal(CI[i,1],
+                 result$Coefficients$CI_lower[i],
+                 tolerance = 1e-5)
+    expect_equal(CI[i,2],
+                 result$Coefficients$CI_upper[i],
+                 tolerance = 1e-5)
+  }
 
-  # Compare standard errors
-  expect_equal(model$std_error, coef(lm_summary)[, "Std. Error"], tolerance = 1e-5)
-})
+  #test R_squared
+  expect_equal(summary(model)$r.squared,
+               result$Multiple_R_squared,
+               tolerance = 1e-5)
 
-# Test edge cases
-test_that("linear_regression handles edge cases correctly", {
-  # Single data point
-  single_data <- data.frame(mpg = 25, wt = 3)
-  expect_error(
-    linear_regression(mpg ~ wt, data = single_data),
-    "The design matrix is singular and cannot be inverted"
-  )
+  #test adjusted_R_squared
+  expect_equal(summary(model)$adj.r.squared ,
+               result$Adjusted_R_squared,
+               tolerance = 1e-5)
 
-
-  # Missing data
-  missing_data <- mtcars
-  missing_data$mpg[1] <- NA
-  expect_warning(linear_regression(mpg ~ wt, data = missing_data, na.action = na.pass), "missing values")
-
-  # Perfect fit
-  perfect_fit_data <- data.frame(y = c(1, 2, 3), x = c(1, 2, 3))
-  model <- linear_regression(y ~ x, data = perfect_fit_data)
-  expect_equal(model$r_squared, 1)
-})
-
-test_that("linear_regression handles missing values correctly", {
-  missing_data <- mtcars
-  missing_data$mpg[1] <- NA
-
-  # Expect warning but continue execution
-  expect_warning(
-    model <- linear_regression(mpg ~ wt, data = missing_data, na.action = na.pass),
-    "Data contains missing values"
-  )
-
-  # Ensure residuals are calculated
-  expect_true(!any(is.na(model$residuals)))
+  #test residuals
+  expect_equal(as.numeric(quantile(residuals(model))[1]),
+               as.numeric(result$Residuals[1]),
+               tolerance = 1e-5)
+  expect_equal(as.numeric(quantile(residuals(model))[2]),
+               as.numeric(result$Residuals[2]),
+               tolerance = 1e-5)
+  expect_equal(as.numeric(quantile(residuals(model))[3]),
+               as.numeric(result$Residuals[3]),
+               tolerance = 1e-5)
+  expect_equal(as.numeric(quantile(residuals(model))[4]),
+               as.numeric(result$Residuals[4]),
+               tolerance = 1e-5)
+  expect_equal(as.numeric(quantile(residuals(model))[5]),
+               as.numeric(result$Residuals[5]),
+               tolerance = 1e-5)
 })

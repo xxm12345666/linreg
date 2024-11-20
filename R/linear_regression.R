@@ -1,89 +1,78 @@
-#' Linear Regression
+#' Linear Regression Function
 #'
-#' A function that implements linear regression without using `lm`.
-#'
-#' @param formula A formula specifying the model (e.g., y ~ x).
-#' @param data A data frame containing the variables in the model.
-#' @param na.action A function indicating what should happen when the data contains NAs. Default is `na.omit`.
-#' @importFrom stats model.frame model.response model.matrix na.omit
-#' @return A list containing:
-#'   \describe{
-#'     \item{coefficients}{Estimated coefficients.}
-#'     \item{fitted_values}{Fitted values.}
-#'     \item{residuals}{Residuals from the model.}
-#'     \item{r_squared}{R-squared value of the model.}
-#'     \item{adj_r_squared}{Adjusted R-squared value of the model.}
-#'     \item{std_error}{Standard errors of the coefficients.}
-#'     \item{t_values}{t-statistics for the coefficients.}
-#'     \item{p_values}{p-values for the coefficients.}
-#'     \item{df_residual}{Degrees of freedom for residuals.}
-#'   }
-#' @examples
-#' # Example using mtcars dataset
-#' model <- linear_regression(mpg ~ wt + hp, data = mtcars)
-#' print(model)
+#' This function performs a linear regression and calculates data related to linear regression models.
+#' @param df A dataframe containing the variables of interest.
+#' @param y The dependent variable from the dataframe.
+#' @param x The covariates from the dataframe.
+#' @return A list containing data related to linear regression models.
 #' @export
-# Linear regression function
-linear_regression <- function(formula, data, na.action = na.omit) {
-  # Handle missing values
-  if (any(is.na(data))) {
-    warning("Data contains missing values. Please handle them using na.action.")
-  }
-  data <- na.action(data)
+#' @examples
+#' data(mtcars)
+#' result=linear_regression(mtcars, "mpg", c("cyl","disp","hp"))
+linear_regression=function(df,y,x){
+  #add x1 to x
+  y=as.matrix(df[,y,drop=FALSE])
+  x=as.matrix(df[,x,drop=FALSE])
+  x1=matrix(1,nrow=nrow(df),ncol=1)
+  colnames(x1)="Intercept"
+  x=cbind(x1,x)
 
-  # Extract response and predictor variables
-  model_frame <- model.frame(formula, data)
-  y <- model.response(model_frame)
-  X <- model.matrix(attr(model_frame, "terms"), model_frame)
-
-  # Ensure column names are not NULL
-  if (is.null(colnames(X))) {
-    colnames(X) <- c("(Intercept)", attr(terms(formula), "term.labels"))
+  if (det(t(x) %*% x) == 0) {
+    stop("The design matrix is singular and cannot be inverted. Check your predictors for multicollinearity or redundancy.")
   }
 
-  # Check if design matrix is singular
-  if (det(t(X) %*% X) == 0) {
-    stop("The design matrix is singular and cannot be inverted. Check your data for collinearity or insufficient observations.")
-  }
+  #calculate
+  degree_freedom=nrow(df)-ncol(x)
+  beta_hat=solve(t(x)%*%x)%*%t(x)%*%y
+  H=x%*%solve(t(x)%*%x)%*%t(x)
+  dimension=nrow(H)
+  I_matrix=diag(dimension)
+  one_matrix=matrix(1,dimension,dimension)
+  sigma_hat=sqrt(sum((y-x%*%beta_hat)^2)/degree_freedom)
+  var_beta_hat=sigma_hat^2*solve(t(x)%*%x)
+  Estimate=beta_hat
+  Std_Error=sqrt(diag(var_beta_hat))
+  alpha=0.05
+  t_q=qt(1-alpha/2,degree_freedom)
+  CI_lower=Estimate-t_q*Std_Error
+  CI_upper=Estimate+t_q*Std_Error
+  SSR=t(y)%*%(H-one_matrix/dimension)%*%y
+  SSY=t(y)%*%(I_matrix-one_matrix/dimension)%*%y
+  SSE=t(y)%*%(I_matrix-H)%*%y
 
-  # Calculate coefficients using OLS
-  beta <- solve(t(X) %*% X) %*% t(X) %*% y
+  R_squared=SSR/SSY
+  adjusted_R_squared=1-(SSE/(degree_freedom))/(SSY/(nrow(df)-1))
 
-  # Fitted values and residuals
-  fitted_values <- X %*% beta
-  residuals <- y - fitted_values
+  t_value=Estimate/Std_Error
+  p_value=2*pt(-abs(t_value),degree_freedom)
 
-  # Degrees of freedom
-  n <- nrow(X)
-  p <- ncol(X)
-  df_residual <- n - p
+  F_statistics=(SSR/(ncol(x)-1))/(SSE/degree_freedom)
+  p_value_F=1-pf(F_statistics,ncol(x)-1,degree_freedom)
 
-  # Residual standard error
-  sigma_squared <- sum(residuals^2) / df_residual
-  sigma <- sqrt(sigma_squared)
+  #create output
+  df_output=data.frame(Estimate=Estimate,
+                       Std_Error=Std_Error,
+                       CI_lower=CI_lower,
+                       CI_upper=CI_upper,
+                       t_value=t_value,
+                       p_value=p_value)
+  rownames(df_output)=colnames(x)
+  colnames(df_output)=c("Estimate","Std_Error","CI_lower","CI_upper","t_value","p_value")
 
-  # Variance-covariance matrix
-  cov_matrix <- sigma_squared * solve(t(X) %*% X)
+  residuals_output=y-x%*%beta_hat
+  residuals_q=quantile(as.numeric(residuals_output),probs=c(0,0.25,0.5,0.75,1))
+  residuals_df=data.frame(Min=residuals_q[1],
+                          Q1=residuals_q[2],
+                          Median=residuals_q[3],
+                          Q3=residuals_q[4],
+                          Max=residuals_q[5])
 
-  # Standard errors of coefficients
-  std_error <- sqrt(diag(cov_matrix))
-  names(std_error) <- colnames(X)  # Attach variable names
-
-  # R-squared and Adjusted R-squared
-  ss_total <- sum((y - mean(y))^2)
-  ss_residual <- sum(residuals^2)
-  r_squared <- 1 - (ss_residual / ss_total)
-  adj_r_squared <- 1 - ((1 - r_squared) * (n - 1) / df_residual)
-
-  # Return result as a list without p-values
-  list(
-    coefficients = as.vector(beta),
-    fitted_values = as.vector(fitted_values),
-    residuals = as.vector(residuals),
-    r_squared = r_squared,
-    adj_r_squared = adj_r_squared,
-    std_error = std_error,
-    t_values = as.vector(beta / std_error),  # Still return t-values
-    df_residual = df_residual
+  list_output=list(Residuals=residuals_df,
+                   Coefficients=df_output,
+                   Residual_standard_error=paste(sigma_hat,"on",degree_freedom,"degrees of freedom"),
+                   Multiple_R_squared=as.numeric(R_squared[1,1]),
+                   Adjusted_R_squared=as.numeric(adjusted_R_squared[1,1]),
+                   F_statistics=paste(F_statistics,"on",ncol(x)-1,"and",degree_freedom,"DF",", p_value:",p_value_F)
   )
+  return(list_output)
 }
