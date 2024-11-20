@@ -39,8 +39,18 @@ The mtcars dataset contains data about various car models and their properties. 
 Use the linear_regression to fit the model:
 ```{r}
 data(mtcars)
+
+# Fit linear regression using custom function
 result <- linear_regression(mtcars, "mpg", c("cyl", "disp", "hp"))
+
+# Fit linear regression using lm
+lm_model <- lm(mpg ~ cyl + disp + hp, data = mtcars)
+
+# View results
 result
+summary(lm_model)
+
+
 ```
 
 ## Coefficients Table
@@ -48,8 +58,11 @@ result
 The Coefficients table shows the estimated coefficients, their standard errors, confidence intervals, t-values, and p-values:
 
 ```{r}
-# Coefficients table
+# Custom function coefficients
 result$Coefficients
+
+# lm function coefficients
+coef(summary(lm_model))
 
 ```
 
@@ -57,8 +70,13 @@ result$Coefficients
 
 The residuals summary provides an overview of the residuals from the model:
 ```{r}
-# Residuals summary
+# Residuals summary (custom function)
 result$Residuals
+
+# Residuals summary (lm)
+residuals_summary <- summary(lm_model)$residuals
+summary(residuals_summary)
+
 
 ```
 
@@ -66,27 +84,26 @@ result$Residuals
 
 The R-squared and Adjusted R-squared values indicate how well the model explains the variability in the response variable:
 ```{r}
-# R-squared values
-cat("Multiple R-squared:", result$Multiple_R_squared, "\n")
-cat("Adjusted R-squared:", result$Adjusted_R_squared, "\n")
+cat("Custom function - Multiple R-squared:", result$Multiple_R_squared, "\n")
+cat("lm function - Multiple R-squared:", summary(lm_model)$r.squared, "\n")
+
+cat("Custom function - Adjusted R-squared:", result$Adjusted_R_squared, "\n")
+cat("lm function - Adjusted R-squared:", summary(lm_model)$adj.r.squared, "\n")
+
 
 ```
 
-## Residual Standard Error
-
-The residual standard error gives an estimate of the variability in the residuals:
-```{r}
-# Residual standard error
-result$Residual_standard_error
-
-```
 
 ## F-statistic
 
 The F-statistic tests the overall significance of the model:
 ```{r}
-# F-statistic
+# Custom function F-statistic
 result$F_statistics
+
+# lm function F-statistic
+summary(lm_model)$fstatistic
+
 
 ```
 
