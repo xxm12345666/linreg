@@ -21,7 +21,7 @@ install.packages("devtools")
 # Install linreg from GitHub
 devtools::install_github("xxm12345666/linreg")
 ```
-## Single Predictor Model
+## Example
 
 Here's an example using the built-in mtcars dataset to predict miles per gallon (mpg) based on the number of cylinders (cyl), displacement (disp), and horsepower (hp):
 
@@ -45,4 +45,5 @@ Residual Standard Error: The standard deviation of residuals.
 R-squared and Adjusted R-squared: Metrics indicating the proportion of variability explained by the model.
 F-statistic: A test for the overall significance of the model.
 
-![Image Description](/Users/maggiexu/Desktop/1.png)
+![Regression Model](https://github.com/xxm12345666/linreg/blob/main/1.png)
+![Regression Model](https://github.com/xxm12345666/linreg/blob/main/2.png)
