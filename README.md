@@ -23,63 +23,26 @@ devtools::install_github("xxm12345666/linreg")
 ```
 ## Single Predictor Model
 
-Perform a simple linear regression with one predictor (wt) and a dependent variable (mpg):
+Here's an example using the built-in mtcars dataset to predict miles per gallon (mpg) based on the number of cylinders (cyl), displacement (disp), and horsepower (hp):
 
 ```{r}
 library(linreg)
 
 # Perform linear regression
-model <- linear_regression(mpg ~ wt, data = mtcars)
+data(mtcars)
+result <- linear_regression(mtcars, "mpg", c("cyl", "disp", "hp"))
 
-# Print the model summary
-print(model)
+# View results
+print(result)
+
 ```
-The model object includes:
+## Output Details
+The result is a list containing the following components:
 
-- coefficients: Intercept and slope(s).
-- r_squared: R-squared value.
-- adj_r_squared: Adjusted R-squared value.
-- residuals: Residuals from the model.
-- std_error: Standard errors for the coefficients.
-- t_values: t-statistics for the coefficients.
-- p_values: p-values for the coefficients.
+Coefficients: A table with estimated coefficients, standard errors, t-values, and p-values.
+Residuals: A summary of the residuals (min, Q1, median, Q3, max).
+Residual Standard Error: The standard deviation of residuals.
+R-squared and Adjusted R-squared: Metrics indicating the proportion of variability explained by the model.
+F-statistic: A test for the overall significance of the model.
 
-## Multiple Predictors Model
-
-You can include multiple predictors to build a more complex model:
-```{r}
-# Perform linear regression with multiple predictors
-model <- linear_regression(mpg ~ wt + hp, data = mtcars)
-
-# Print the model summary
-print(model)
-```
-
-## Comparing linear_regression and lm
-The linear_regression function replicates many features of lm. Below is an example of how to compare results:
-
-```{r}
-# Fit models using linreg and lm
-linreg_model <- linear_regression(mpg ~ wt, data = mtcars)
-lm_model <- lm(mpg ~ wt, data = mtcars)
-
-# Compare coefficients
-cat("linreg coefficients:", linreg_model$coefficients, "\n")
-cat("lm coefficients:", coef(lm_model), "\n")
-
-# Compare R-squared values
-cat("linreg R-squared:", linreg_model$r_squared, "\n")
-cat("lm R-squared:", summary(lm_model)$r.squared, "\n")
-```
-
-## Residual Diagnostics
-
-You can visualize residuals from the model to evaluate its fit:
-
-```{r}
-# Plot residuals
-plot(linreg_model$residuals, main = "Residuals (linreg)", ylab = "Residuals", xlab = "Index")
-abline(h = 0, col = "red", lty = 2)
-```
-
-
+![Image Description](/Users/maggiexu/Desktop/1.png)
