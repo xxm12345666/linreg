@@ -18,16 +18,84 @@ knitr::opts_chunk$set(
 library(linreg)
 ```
 
-Introduction
+## Introduction
 
-This tutorial demonstrates how to use the linreg package to perform linear regression.
+This tutorial demonstrates how to use the linreg package to perform linear regression. The linear_regression function replicates much of the behavior of lm while offering flexibility for educational or custom purposes.
 
-Example Usage
+
+## Single Predictor Model
+
+We start with a simple linear regression model using the mtcars dataset. The dependent variable (mpg) is predicted by one independent variable (wt).
 
 ```{r}
-# Perform linear regression on mtcars dataset
-model <- linear_regression(mpg ~ wt, data = mtcars)
-model
+# Perform linear regression with one predictor
+model1 <- linear_regression(mpg ~ wt, data = mtcars)
+# Perform linear regression with lm for comparison
+lm_model1 <- lm(mpg ~ wt, data = mtcars)
+
+# Print linreg result
+model1
+
+# Print lm summary
+summary(lm_model1)
 
 ```
+
+## Multiple Predictors Model
+
+You can extend the model to include multiple predictors. For example, we include hp (horsepower) as an additional predictor:
+
+```{r}
+# Perform linear regression with two predictors using linreg
+model2 <- linear_regression(mpg ~ wt + hp, data = mtcars)
+
+# Perform linear regression with lm for comparison
+lm_model2 <- lm(mpg ~ wt + hp, data = mtcars)
+
+# Print linreg result
+model2
+
+# Print lm summary
+summary(lm_model2)
+
+```
+Comparison of Coefficients:
+```{r}
+cat("linreg Coefficients:\n", model2$coefficients, "\n")
+cat("lm Coefficients:\n", coef(lm_model2), "\n")
+```
+
+Comparison of R-squared:
+```{r}
+cat("linreg R-squared:", model2$r_squared, "\n")
+cat("lm R-squared:", summary(lm_model2)$r.squared, "\n")
+```
+
+Comparison of Adjusted R-squared:
+```{r}
+cat("linreg Adjusted R-squared:", model2$adj_r_squared, "\n")
+cat("lm Adjusted R-squared:", summary(lm_model2)$adj.r.squared, "\n")
+```
+
+
+## Residual Diagnostics
+
+The linear_regression function also provides residuals, which can be used to evaluate the model fit visually.
+
+```{r}
+# Residual diagnostics
+par(mfrow = c(1, 2))  # Set up a 1x2 plotting space
+
+# Residuals from linreg
+plot(model2$residuals, main = "Residuals (linreg)", ylab = "Residuals", xlab = "Index")
+abline(h = 0, col = "red", lty = 2)
+
+# Residuals from lm
+plot(residuals(lm_model2), main = "Residuals (lm)", ylab = "Residuals", xlab = "Index")
+abline(h = 0, col = "red", lty = 2)
+
+
+```
+
+
 

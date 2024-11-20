@@ -4,12 +4,14 @@
 \alias{linear_regression}
 \title{Linear Regression}
 \usage{
-linear_regression(formula, data)
+linear_regression(formula, data, na.action = na.omit)
 }
 \arguments{
 \item{formula}{A formula specifying the model (e.g., y ~ x).}
 
 \item{data}{A data frame containing the variables in the model.}
+
+\item{na.action}{A function indicating what should happen when the data contains NAs. Default is `na.omit`.}
 }
 \value{
 A list containing:
@@ -18,6 +20,11 @@ A list containing:
     \item{fitted_values}{Fitted values.}
     \item{residuals}{Residuals from the model.}
     \item{r_squared}{R-squared value of the model.}
+    \item{adj_r_squared}{Adjusted R-squared value of the model.}
+    \item{std_error}{Standard errors of the coefficients.}
+    \item{t_values}{t-statistics for the coefficients.}
+    \item{p_values}{p-values for the coefficients.}
+    \item{df_residual}{Degrees of freedom for residuals.}
   }
 }
 \description{
@@ -25,6 +32,6 @@ A function that implements linear regression without using `lm`.
 }
 \examples{
 # Example using mtcars dataset
-model <- linear_regression(mpg ~ wt, data = mtcars)
+model <- linear_regression(mpg ~ wt + hp, data = mtcars)
 print(model)
 }
