@@ -12,6 +12,12 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+if (!requireNamespace("bench", quietly = TRUE)) {
+  install.packages("bench")
+}
+
+
 ```
 
 ```{r setup}
@@ -32,13 +38,8 @@ The mtcars dataset contains data about various car models and their properties. 
 
 Use the linear_regression to fit the model:
 ```{r}
-# Load the mtcars dataset
 data(mtcars)
-
-# Fit the linear regression model
 result <- linear_regression(mtcars, "mpg", c("cyl", "disp", "hp"))
-
-# View the model output
 result
 ```
 
