@@ -45,4 +45,4 @@ Residual Standard Error: The standard deviation of residuals.
 R-squared and Adjusted R-squared: Metrics indicating the proportion of variability explained by the model.
 F-statistic: A test for the overall significance of the model.
 
-![Image Description](/Users/maggiexu/Desktop/1.png)
+
