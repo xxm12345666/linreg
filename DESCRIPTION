@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Xiaomeng Xu
 Maintainer: Xiaomeng Xu <xxmeng@umich.edu>
 Description: A package that implements linear regression without using `lm`.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
@@ -14,3 +14,4 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+RoxygenNote: 7.3.2

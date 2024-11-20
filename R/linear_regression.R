@@ -1,13 +1,21 @@
 #' Linear Regression
 #'
-#' Implements a simple linear regression algorithm.
+#' A function that implements linear regression without using `lm`.
 #'
 #' @param formula A formula specifying the model (e.g., y ~ x).
 #' @param data A data frame containing the variables in the model.
-#' @return A list containing coefficients, fitted values, residuals, and R-squared.
+#' @importFrom stats model.frame model.response model.matrix
+#' @return A list containing:
+#'   \describe{
+#'     \item{coefficients}{Estimated coefficients.}
+#'     \item{fitted_values}{Fitted values.}
+#'     \item{residuals}{Residuals from the model.}
+#'     \item{r_squared}{R-squared value of the model.}
+#'   }
 #' @examples
+#' # Example using mtcars dataset
 #' model <- linear_regression(mpg ~ wt, data = mtcars)
-#' model
+#' print(model)
 #' @export
 linear_regression <- function(formula, data) {
   # Extract response and predictor variables
@@ -15,7 +23,7 @@ linear_regression <- function(formula, data) {
   y <- model.response(model_frame)
   X <- model.matrix(attr(model_frame, "terms"), model_frame)
 
-  # Calculate coefficients using OLS: (X'X)^(-1) X'y
+  # Calculate coefficients using OLS
   beta <- solve(t(X) %*% X) %*% t(X) %*% y
 
   # Fitted values and residuals
